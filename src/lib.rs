@@ -325,21 +325,21 @@ impl Build {
             // prefix, we unset `CROSS_COMPILE` for `./Configure`.
             configure.env_remove("CROSS_COMPILE");
 
-            let ar = cc.get_archiver();
-            configure.env("AR", ar.get_program());
-            if ar.get_args().count() != 0 {
-                // On some platforms (like emscripten on windows), the ar to use may not be a
-                // single binary, but instead a multi-argument command like `cmd /c emar.bar`.
-                // We can't convey that through `AR` alone, and so also need to set ARFLAGS.
-                configure.env(
-                    "ARFLAGS",
-                    ar.get_args().collect::<Vec<_>>().join(OsStr::new(" ")),
-                );
-            }
-
             // We don't have GCC in newer NDK versions.
-            if !target.contains("android") || (target.contains("android") && path.contains("-gcc"))
+            if !target.contains("android") || (target.contains("android") && path.contains("-gcc")) 
             {
+                let ar = cc.get_archiver();
+                configure.env("AR", ar.get_program());
+                if ar.get_args().count() != 0 {
+                    // On some platforms (like emscripten on windows), the ar to use may not be a
+                    // single binary, but instead a multi-argument command like `cmd /c emar.bar`.
+                    // We can't convey that through `AR` alone, and so also need to set ARFLAGS.
+                    configure.env(
+                        "ARFLAGS",
+                        ar.get_args().collect::<Vec<_>>().join(OsStr::new(" ")),
+                    );
+                }
+
                 let ranlib = cc.get_ranlib();
                 // OpenSSL does not support RANLIBFLAGS. Jam the flags in RANLIB.
                 let mut args = vec![ranlib.get_program()];
